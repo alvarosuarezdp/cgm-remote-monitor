@@ -95,11 +95,23 @@
 			var last = new Date(rec.date);
 			var now = new Date( );
 			var elapsedMins = Math.round(((now - last) / 1000) / 60);
-
+			
+			var bgHigh = window.serverSettings.settings.thresholds.bgHigh;
+			var bgLow = window.serverSettings.settings.thresholds.bgLow;
+			var bgTargetBottom = window.serverSettings.settings.thresholds.bgTargetBottom;
+			var bgTargetTop = window.serverSettings.settings.thresholds.bgTargetTop;
+			
 			// Convert BG to mmol/L if necessary.
 			if (window.serverSettings.settings.units == 'mmol') {
 				rec.sgv = Nightscout.units.mgdlToMMOL(rec.sgv);
 			}
+			
+			// These are the particular shades of red, yellow, green, and blue.
+			var red = 'rgba(213,9,21,1)';
+			var yellow = 'rgba(234,168,0,1)';
+			var black = 'rgba(0,0,0,0)';
+			var blue = 'rgba(78,143,207,1)';
+
 
 			// Insert the BG value text.
 			$('#bgnow').text(rec.sgv);
@@ -110,6 +122,23 @@
 			// Time before data considered stale.
 			var staleMinutes = 13;
 			var threshold = 1000 * 60 * staleMinutes;
+			
+			// Threshold background coloring.
+			if (bgNum < bgLow) {
+				$('body').css('background-color', red);
+			}
+			if ((bgLow <= bgNum) && (bgNum < bgTargetBottom)) {
+				$('body').css('background-color', blue);
+			}
+			if ((bgTargetBottom <= bgNum) && (bgNum < bgTargetTop)) {
+				$('body').css('background-color', black);
+			}
+			if ((bgTargetTop <= bgNum) && (bgNum < bgHigh)) {
+				$('body').css('background-color', yellow);
+			}
+			if (bgNum >= bgHigh) {
+				$('body').css('background-color', red);
+			}
 		
 			// Make the "x minutes ago" visible.
 			if (now - last > threshold) {
